@@ -60,6 +60,25 @@ class AuthTests(unittest.TestCase):
             with patch('app.auth.service.resolve_tenant', return_value=tenant), patch('app.auth.service.get_tenant_connection') as connection, patch('app.auth.service.verify_password', return_value=True), patch('app.auth.service.settings', jwt_access_token_expire_minutes=17):
                 cur = connection.return_value.__enter__.return_value.cursor.return_value.__enter__.return_value
                 cur.fetchall.return_value = [(uuid4(), 'a@example.com', 'hash', 'A', None, 'ACTIVE', role)]
+                doctor_id = uuid4()
+                cur.fetchone.return_value = (doctor_id,)
                 response = authenticate_user(tenant_code='TEST', email='a@example.com', password='password')
                 self.assertEqual(response['expires_in'], 1020)
                 self.assertEqual(decode_access_token(response['access_token'])['role'], role)
+                claims = decode_access_token(response['access_token'])
+                self.assertEqual(claims['email'], 'a@example.com')
+                self.assertEqual(claims['sub'], str(cur.fetchall.return_value[0][0]))
+                if role == 'DOCTOR':
+                    self.assertEqual(claims['doctor_id'], str(doctor_id))
+                    self.assertNotEqual(claims['doctor_id'], claims['sub'])
+                else:
+                    self.assertNotIn('doctor_id', claims)
+
+    def test_doctor_without_profile_can_login_for_onboarding(self):
+        tenant = SimpleNamespace(tenant_id=uuid4(), tenant_code='TEST')
+        with patch('app.auth.service.resolve_tenant', return_value=tenant), patch('app.auth.service.get_tenant_connection') as connection, patch('app.auth.service.verify_password', return_value=True):
+            cur = connection.return_value.__enter__.return_value.cursor.return_value.__enter__.return_value
+            cur.fetchall.return_value = [(uuid4(), 'doc@example.com', 'hash', 'A', None, 'ACTIVE', 'DOCTOR')]
+            cur.fetchone.return_value = None
+            response = authenticate_user(tenant_code='TEST', email='doc@example.com', password='password')
+            self.assertIsNone(decode_access_token(response['access_token'])['doctor_id'])

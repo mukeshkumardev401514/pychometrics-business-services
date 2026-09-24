@@ -11,11 +11,55 @@ from tests.test_doctors import app, request, get_current_user
 from app.auth.platform import get_platform_user
 from app.resources.models import CATALOG, input_model, public_record
 from app.resources.policy import authorize
-from app.resources.service import key_values, row_scope
+from app.resources.service import execute, key_values, row_scope
 from scripts.build_resource_catalog import compile_catalog
 
 
 class ResourceTests(unittest.TestCase):
+    def test_patient_reads_preserve_nullable_user_fields(self):
+        user = SimpleNamespace(role='DOCTOR', user_id=uuid4())
+        fields = {'email': None, 'first_name': None, 'last_name': None, 'mobile': None}
+        patient = {'id': uuid4(), 'user_id': uuid4(), **fields}
+        for action in ('list', 'get'):
+            with self.subTest(action=action), patch('app.resources.service.connection') as connection:
+                cur = connection.return_value.__enter__.return_value.cursor.return_value.__enter__.return_value
+                cur.fetchone.return_value = patient
+                if action == 'list':
+                    cur.fetchone.side_effect = [patient, {'total_patients': 1, 'active': 1,
+                                                        'in_progress': 0, 'not_started': 0}]
+                cur.fetchall.return_value = [patient]
+                result = execute('tenant', 'patients', action, user, key=str(patient['id']))
+                query, params = cur.execute.call_args.args
+                query = query.as_string()
+                self.assertIn('LEFT JOIN users u ON u.id = r.user_id', query)
+                self.assertIn('d.user_id = %s', query)
+                self.assertIn(user.user_id, params)
+                record = result['items'][0] if action == 'list' else result
+                for field in fields:
+                    self.assertIn(f'u.{field}', query)
+                    self.assertIn(field, record)
+                    self.assertIsNone(record[field])
+                self.assertNotIn('password', query)
+
+    def test_patient_counts_are_scoped_and_independent_of_page(self):
+        user = SimpleNamespace(role='DOCTOR', user_id=uuid4())
+        for total, offset in ((101, 0), (101, 200), (0, 0)):
+            with self.subTest(total=total, offset=offset), patch('app.resources.service.connection') as connection:
+                cur = connection.return_value.__enter__.return_value.cursor.return_value.__enter__.return_value
+                counts = {'total_patients': total, 'active': total, 'in_progress': 0, 'not_started': 0}
+                cur.fetchone.side_effect = [{'allowed': 1}, counts]
+                cur.fetchall.return_value = []
+                result = execute('tenant', 'patients', 'list', user, limit=20, offset=offset)
+                self.assertEqual(result['counts'], counts)
+                self.assertEqual(result['pagination'], {'limit': 20, 'offset': offset,
+                                                       'total': total, 'total_pages': 6 if total else 0})
+                query, params = cur.execute.call_args_list[1].args
+                query = query.as_string()
+                self.assertIn('d.user_id = %s', query)
+                self.assertEqual(params, (user.user_id,))
+                self.assertNotIn('LIMIT', query)
+                self.assertIn('pending AND NOT started', query)
+
     def tearDown(self):
         app.dependency_overrides.clear()
 

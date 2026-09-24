@@ -29,6 +29,8 @@ def create_access_token(
     user_id: UUID,
     tenant_id: UUID,
     role: str,
+    email: str | None = None,
+    doctor_id: UUID | None = None,
 ) -> str:
 
     now = datetime.now(timezone.utc)
@@ -46,6 +48,11 @@ def create_access_token(
         "iat": now,
         "exp": expires_at,
     }
+
+    if email is not None:
+        payload['email'] = email
+    if role == 'DOCTOR':
+        payload['doctor_id'] = str(doctor_id) if doctor_id is not None else None
 
     return jwt.encode(
         payload,

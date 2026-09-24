@@ -221,14 +221,50 @@ def execute(scope, table, action, user, *, key=None, values=None, limit=20, offs
                                    WHERE ur.user_id=%s AND r.code=%s AND p.code=%s''', (user.user_id, user.role, permission))
                     if cur.fetchone() is None: raise HTTPException(403, 'Permission denied.')
             condition, params = (sql.SQL('TRUE'), []) if maintenance or scope == 'platform' else row_scope(table, user)
+            read_source = sql.SQL('{} r').format(sql.Identifier(table))
+            read_fields = sql.SQL('r.*')
+            if scope == 'tenant' and table == 'patients' and action in ('list', 'get'):
+                # Keep the patient and expose NULL user fields if no user matches.
+                read_source += sql.SQL(' LEFT JOIN users u ON u.id = r.user_id')
+                read_fields += sql.SQL(', u.email, u.first_name, u.last_name, u.mobile')
             if action == 'list':
-                cur.execute(sql.SQL('SELECT r.* FROM {} r WHERE {} ORDER BY {} LIMIT %s OFFSET %s').format(
-                    sql.Identifier(table), condition, sql.SQL(', ').join(sql.Identifier('r', name) for name in spec['primary_key'])), (*params, limit, offset))
-                return {'items': [public_record(row) for row in cur.fetchall()], 'limit': limit, 'offset': offset}
+                counts = None
+                if scope == 'tenant' and table == 'patients':
+                    # Aggregate the same authorized patient set before pagination.
+                    # EXISTS avoids counting a patient multiple times for assignments.
+                    cur.execute(sql.SQL('''
+                        SELECT COUNT(*) AS total_patients,
+                               COUNT(*) FILTER (WHERE status = 'ACTIVE') AS active,
+                               COUNT(*) FILTER (WHERE started) AS in_progress,
+                               COUNT(*) FILTER (WHERE pending AND NOT started) AS not_started
+                        FROM (
+                            SELECT r.status,
+                                   EXISTS (SELECT 1 FROM assessment_assignments a
+                                           WHERE a.patient_id = r.id
+                                             AND a.assignment_status = 'IN_PROGRESS') AS started,
+                                   EXISTS (SELECT 1 FROM assessment_assignments a
+                                           WHERE a.patient_id = r.id
+                                             AND a.assignment_status IN ('PENDING_PAYMENT', 'ASSIGNED')) AS pending
+                            FROM patients r WHERE {}
+                        ) visible_patients
+                    ''').format(condition), tuple(params))
+                    counts = cur.fetchone()
+                cur.execute(sql.SQL('SELECT {} FROM {} WHERE {} ORDER BY {} LIMIT %s OFFSET %s').format(
+                    read_fields, read_source, condition, sql.SQL(', ').join(sql.Identifier('r', name) for name in spec['primary_key'])), (*params, limit, offset))
+                result = {'items': [public_record(row) for row in cur.fetchall()], 'limit': limit, 'offset': offset}
+                if counts is not None:
+                    total = counts['total_patients']
+                    result = {
+                        'counts': counts,
+                        'pagination': {'limit': limit, 'offset': offset, 'total': total,
+                                       'total_pages': (total + limit - 1) // limit},
+                        **result,
+                    }
+                return result
             old = None
             if action != 'create':
                 keys = key_values(spec, key)
-                cur.execute(sql.SQL('SELECT r.* FROM {} r WHERE {} AND {}{}').format(sql.Identifier(table), predicate(keys), condition,
+                cur.execute(sql.SQL('SELECT {} FROM {} WHERE {} AND {}{}').format(read_fields, read_source, predicate(keys), condition,
                     sql.SQL(' FOR UPDATE' if action != 'get' else '')), (*keys.values(), *params))
                 old = cur.fetchone()
                 if old is None: raise HTTPException(404, 'Record not found.')

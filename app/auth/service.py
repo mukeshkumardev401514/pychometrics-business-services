@@ -104,6 +104,13 @@ def authenticate_user(
             # one effective role in the JWT.
             role = roles[0]
 
+            doctor_id = None
+            if role == 'DOCTOR':
+                cur.execute('SELECT id FROM doctors WHERE user_id = %s', (user_id,))
+                doctor = cur.fetchone()
+                if doctor is not None:
+                    doctor_id = doctor[0]
+
             cur.execute(
                 """
                 UPDATE users
@@ -125,6 +132,8 @@ def authenticate_user(
         user_id=user_id,
         tenant_id=tenant.tenant_id,
         role=role,
+        email=user_email,
+        doctor_id=doctor_id,
     )
 
     return {
