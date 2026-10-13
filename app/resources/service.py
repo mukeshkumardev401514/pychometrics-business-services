@@ -172,6 +172,21 @@ def relation_checks(cur, scope, table, row, user, maintenance, tenant=None):
         if cur.fetchone() is None: raise HTTPException(422, 'Doctor is not assigned to this patient.')
 
 
+def ensure_single_pending_assignment(cur, row):
+    if row.get('assignment_status', 'PENDING_PAYMENT') not in {'PENDING_PAYMENT', 'ASSIGNED', 'IN_PROGRESS'}:
+        return
+    # Transaction-scoped serialization also protects simultaneous create requests.
+    lock_key = f"pending-assignment:{row['patient_id']}:{row['assessment_id']}"
+    cur.execute('SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))', (lock_key,))
+    cur.execute("""SELECT id FROM assessment_assignments
+                   WHERE patient_id=%s AND assessment_id=%s
+                     AND assignment_status IN ('PENDING_PAYMENT','ASSIGNED','IN_PROGRESS')
+                     AND (%s::uuid IS NULL OR id <> %s::uuid)
+                   LIMIT 1""", (row['patient_id'], row['assessment_id'], row.get('id'), row.get('id')))
+    if cur.fetchone() is not None:
+        raise HTTPException(409, 'This test is already pending for this patient.')
+
+
 def adapt(spec, values):
     return {name: Jsonb(value) if spec['columns'].get(name, {}).get('type') == 'jsonb' and value is not None else value for name, value in values.items()}
 
@@ -249,8 +264,13 @@ def execute(scope, table, action, user, *, key=None, values=None, limit=20, offs
                         ) visible_patients
                     ''').format(condition), tuple(params))
                     counts = cur.fetchone()
+                ordering = sql.SQL(', ').join(sql.Identifier('r', name) for name in spec['primary_key'])
+                if scope == 'tenant' and table == 'patients':
+                    # Sort before pagination so newly created patients appear on page one.
+                    # The primary key keeps equal creation timestamps in a stable order.
+                    ordering = sql.SQL('{} DESC, {}').format(sql.Identifier('r', 'created_at'), ordering)
                 cur.execute(sql.SQL('SELECT {} FROM {} WHERE {} ORDER BY {} LIMIT %s OFFSET %s').format(
-                    read_fields, read_source, condition, sql.SQL(', ').join(sql.Identifier('r', name) for name in spec['primary_key'])), (*params, limit, offset))
+                    read_fields, read_source, condition, ordering), (*params, limit, offset))
                 result = {'items': [public_record(row) for row in cur.fetchall()], 'limit': limit, 'offset': offset}
                 if counts is not None:
                     total = counts['total_patients']
@@ -296,6 +316,12 @@ def execute(scope, table, action, user, *, key=None, values=None, limit=20, offs
                 for field in immutable & values.keys():
                     if old.get(field) != values[field]: raise HTTPException(422, f'{field} cannot be reassigned; create a new relationship.')
             combined = {**(old or {}), **values}
+            if scope == 'platform' and table == 'assessments':
+                minimum, maximum = combined.get('min_age'), combined.get('max_age')
+                if minimum is not None and maximum is not None and minimum > maximum:
+                    raise HTTPException(422, 'min_age cannot exceed max_age.')
+            if scope == 'tenant' and table == 'assessment_assignments':
+                ensure_single_pending_assignment(cur, combined)
             relation_checks(cur, scope, table, combined, user, maintenance, tenant)
             # Validate new row ownership even where parents were admin-visible.
             if not maintenance and action == 'create':

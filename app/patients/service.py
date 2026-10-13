@@ -58,7 +58,13 @@ def create_patient(current_user: CurrentUser, request: PatientCreate) -> Patient
                 )
                 # Validate before the connection context commits all four writes.
                 return PatientResponse(**user_values, **values, **patient, primary_doctor_id=doctor['id'])
-    except UniqueViolation:
-        raise HTTPException(409, 'Email, mobile or patient code already exists.') from None
+    except UniqueViolation as error:
+        messages = {
+            'users_email_key': 'Email already exists.',
+            'users_mobile_key': 'Mobile number already exists.',
+            'patients_patient_code_key': 'Patient code already exists.',
+        }
+        detail = messages.get(error.diag.constraint_name, 'Email, mobile or patient code already exists.')
+        raise HTTPException(409, detail) from None
     except Error:
         raise HTTPException(503, 'Unable to create patient at this time.') from None

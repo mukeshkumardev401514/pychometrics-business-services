@@ -68,10 +68,14 @@ def compile_catalog():
                     table['foreign_keys'].append({'column': col, 'table': target, 'target': target_col})
                 assert table['primary_key'], match[1]
                 tables[match[1]] = table
-        # V019 adds the only column/FK via ALTER TABLE in these migrations.
+        # Explicitly handle the reviewed assessment ALTER migrations.
         if scope == 'platform':
             tables['assessments']['columns']['category_id'] = {'type': 'uuid', 'nullable': True, 'default': False}
             tables['assessments']['foreign_keys'].append({'column': 'category_id', 'table': 'assessment_categories', 'target': 'id'})
+            metadata = (ROOT / 'psychometric-db-models/platform/V030__assessment_metadata.sql').read_text()
+            for name, dtype in re.findall(r'ADD COLUMN (\w+) (VARCHAR\(\d+\)|TEXT|INTEGER|JSONB|BOOLEAN)', metadata):
+                tables['assessments']['columns'][name] = {'type': dtype.lower(), 'nullable': True, 'default': False}
+
         catalog[scope] = tables
     return catalog
 

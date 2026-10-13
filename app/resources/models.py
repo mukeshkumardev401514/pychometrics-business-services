@@ -26,6 +26,31 @@ class InputModel(BaseModel):
         return self
 
 
+class AssessmentInputModel(InputModel):
+    @model_validator(mode='before')
+    @classmethod
+    def normalize_metadata(cls, values):
+        import math
+        if not isinstance(values, dict):
+            return values
+        values = dict(values)
+        for key, value in values.items():
+            if key in cls.model_fields and cls.model_fields[key].json_schema_extra.get('not_null') is False:
+                if isinstance(value, float) and math.isnan(value):
+                    values[key] = None
+            if isinstance(values[key], str):
+                values[key] = values[key].strip()
+        if isinstance(values.get('charts'), str):
+            values['charts'] = [part.strip() for part in values['charts'].split(',') if part.strip()]
+        return values
+
+    @model_validator(mode='after')
+    def validate_age_range(self):
+        if self.min_age is not None and self.max_age is not None and self.min_age > self.max_age:
+            raise ValueError('min_age cannot exceed max_age.')
+        return self
+
+
 def field_type(info):
     dtype = info['type']
     if 'enum' in info:
@@ -44,6 +69,9 @@ def input_model(scope, table, update=False):
             continue
         annotation = EmailStr if name == 'email' else field_type(info)
         kwargs = {'json_schema_extra': {'not_null': not info['nullable']}}
+        if scope == 'platform' and table == 'assessments':
+            if name == 'charts': annotation = list[str]
+            if name in {'min_age', 'max_age'}: kwargs['ge'] = 0
         size = re.search(r'(?:varchar|character varying)\((\d+)\)', info['type'])
         if size: kwargs['max_length'] = int(size[1])
         numeric = re.fullmatch(r'numeric\((\d+),(\d+)\)', info['type'])
@@ -59,7 +87,7 @@ def input_model(scope, table, update=False):
                               Field(default=None if update else ..., min_length=8, max_length=128,
                                     json_schema_extra={'not_null': True}))
     return create_model(f'{scope.title()}{"".join(x.title() for x in table.split("_"))}{"Update" if update else "Create"}',
-                        __base__=InputModel, **fields)
+                        __base__=AssessmentInputModel if scope == 'platform' and table == 'assessments' else InputModel, **fields)
 
 
 def public_record(row):

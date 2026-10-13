@@ -110,6 +110,7 @@ Tenant methods additionally enforce role, permission and ownership checks; see `
 | `psychometric-db-models/platform/V027__payout_batches.sql` | platform.payout_batches |
 | `psychometric-db-models/platform/V028__doctor_payouts.sql` | platform.doctor_payouts |
 | `psychometric-db-models/platform/V029__doctor_payout_items.sql` | platform.doctor_payout_items |
+| `psychometric-db-models/platform/V030__assessment_metadata.sql` | Enums, extension, alteration or seed data; no separate table endpoint |
 | `psychometric-db-models/seed/platform/V001__assessment_categories.sql` | Enums, extension, alteration or seed data; no separate table endpoint |
 | `psychometric-db-models/seed/platform/V003__sample_financial_data.sql` | Enums, extension, alteration or seed data; no separate table endpoint |
 | `psychometric-db-models/tenant/V000__migration_history.sql` | tenant.schema_migrations |

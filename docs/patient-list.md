@@ -17,6 +17,10 @@ Counts cover the authorized patient set, independent of pagination. Doctors see
 their actively linked patients; hospital admins see their tenant's patients.
 Patient users see only themselves. Existing permission checks still apply.
 
+Patients are ordered newest to oldest by `created_at` before pagination, with
+`id` as a stable tie-breaker. Newly created visible patients appear on the first
+page when the list is reloaded.
+
 - `total_patients`: all visible patients.
 - `active`: visible patients whose patient status is `ACTIVE`.
 - `in_progress`: visible patients with at least one `IN_PROGRESS` assessment assignment.

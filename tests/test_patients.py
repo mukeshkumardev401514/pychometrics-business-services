@@ -86,6 +86,27 @@ class PatientTests(unittest.TestCase):
         self.assertEqual(self.call(), 409)
         self.assertEqual(self.cur.execute.call_count, 3)
 
+    def test_duplicate_constraint_identifies_field_and_rolls_back(self):
+        from psycopg.errors import UniqueViolation
+
+        for constraint, detail in (
+            ('users_email_key', 'Email already exists.'),
+            ('users_mobile_key', 'Mobile number already exists.'),
+            ('patients_patient_code_key', 'Patient code already exists.'),
+            ('unknown_constraint', 'Email, mobile or patient code already exists.'),
+        ):
+            with self.subTest(constraint=constraint):
+                class Conflict(UniqueViolation):
+                    @property
+                    def diag(self):
+                        return SimpleNamespace(constraint_name=constraint)
+
+                self.cur.execute.side_effect = Conflict('private database details')
+                response = {}
+                self.assertEqual(self.call(response=response), 409)
+                self.assertEqual(response['detail'], detail)
+                self.assertIs(self.connection.return_value.__exit__.call_args.args[0], Conflict)
+
     def test_assignment_failure_rolls_back(self):
         from psycopg.errors import UniqueViolation
         self.cur.execute.side_effect = [None] * 6 + [UniqueViolation('internal details')]

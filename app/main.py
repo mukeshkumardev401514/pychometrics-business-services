@@ -59,3 +59,7 @@ from app.resources.router import router as resources_router
 
 app.include_router(platform_auth_router)
 app.include_router(resources_router)
+
+from app.assessment_catalog import router as assessment_catalog_router
+
+app.include_router(assessment_catalog_router)

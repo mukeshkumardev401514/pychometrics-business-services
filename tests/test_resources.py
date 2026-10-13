@@ -59,6 +59,10 @@ class ResourceTests(unittest.TestCase):
                 self.assertEqual(params, (user.user_id,))
                 self.assertNotIn('LIMIT', query)
                 self.assertIn('pending AND NOT started', query)
+                page_query, page_params = cur.execute.call_args.args
+                self.assertIn('ORDER BY "r"."created_at" DESC, "r"."id" LIMIT %s OFFSET %s',
+                              page_query.as_string())
+                self.assertEqual(page_params, (user.user_id, 20, offset))
 
     def tearDown(self):
         app.dependency_overrides.clear()
