@@ -63,3 +63,15 @@ app.include_router(resources_router)
 from app.assessment_catalog import router as assessment_catalog_router
 
 app.include_router(assessment_catalog_router)
+
+from app.assessment_browser import router as assessment_browser_router
+
+app.include_router(assessment_browser_router)
+
+from app.patient_assessments import router as patient_assessments_router
+
+app.include_router(patient_assessments_router)
+
+from app.assessment_payments import router as assessment_payments_router
+
+app.include_router(assessment_payments_router)

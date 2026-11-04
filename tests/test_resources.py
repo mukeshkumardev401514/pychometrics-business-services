@@ -69,7 +69,7 @@ class ResourceTests(unittest.TestCase):
 
     def test_catalog_matches_every_migration_table(self):
         self.assertEqual(CATALOG, compile_catalog())
-        self.assertEqual(len(CATALOG['platform']), 25)
+        self.assertEqual(len(CATALOG['platform']), 26)
         self.assertEqual(len(CATALOG['tenant']), 38)
 
     def test_all_tables_have_read_routes(self):
@@ -153,6 +153,8 @@ class ResourceTests(unittest.TestCase):
                 request=item['request']
                 url=request['url'].replace('{{base_url}}','').split('?')[0]
                 url=url.replace('{{maintenance_tenant_id}}','{tenant_id}').replace('{{doctor_id}}','{doctor_id}')
+                url=url.replace('{{browser_assessment_id}}','{assessment_id}').replace('{{browser_version_id}}','{version_id}')
+                url=url.replace('{{patient_assignment_id}}','{assignment_id}')
                 url=re.sub(r'\{\{(?:platform|tenant)_\w+_key\}\}', '{key}', url)
                 covered.add((request['method'].lower(),url))
                 for name in re.findall(r'\{\{(\w+)\}\}',json.dumps(request)):

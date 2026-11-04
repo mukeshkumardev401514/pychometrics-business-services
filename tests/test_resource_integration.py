@@ -212,3 +212,54 @@ class ResourceIntegrationTests(unittest.TestCase):
         with self.assertRaises(HTTPException) as error:
             self.call('patients','update',key=str(patient['id']),values={'user_id':self.user()['id']})
         self.assertEqual(error.exception.status_code,422)
+
+    def test_import_subcategory_reuse_and_category_constraint(self):
+        from scripts.import_assessments import normalize, upsert
+        code = 'SUBTEST-' + str(uuid4())
+        record = dict(assessment_id=code, assessment_name='Subcategory test',
+                      assessment_category='Category ' + str(uuid4()),
+                      assessment_subcategory=' Social Anxiety ', min_age=0,
+                      max_age=100, assessment_duration=30)
+        with psycopg.connect(self.base+' dbname=platform_test') as conn:
+            upsert(conn, normalize(record), 1, None)
+            first = conn.execute('SELECT subcategory_id FROM assessments WHERE code=%s', (code,)).fetchone()[0]
+            record['assessment_subcategory'] = 'social anxiety'
+            upsert(conn, normalize(record), 1, None)
+            self.assertEqual(first, conn.execute('SELECT subcategory_id FROM assessments WHERE code=%s', (code,)).fetchone()[0])
+            other = conn.execute('INSERT INTO assessment_categories(code,name) VALUES(%s,%s) RETURNING id',
+                                 (str(uuid4()), 'Other')).fetchone()[0]
+            with self.assertRaises(psycopg.errors.ForeignKeyViolation):
+                with conn.transaction():
+                    conn.execute('UPDATE assessments SET category_id=%s WHERE code=%s', (other, code))
+            record['assessment_subcategory'] = None
+            upsert(conn, normalize(record), 1, None)
+            self.assertIsNone(conn.execute('SELECT subcategory_id FROM assessments WHERE code=%s', (code,)).fetchone()[0])
+
+    def test_patient_content_assignment_ownership_and_activation(self):
+        from app.patient_assessments import accessible_assignment
+        doctor, patient = self.doctor_patient()
+        user = SimpleNamespace(user_id=patient['user_id'], tenant=self.tenant)
+        with psycopg.connect(self.base+' dbname=tenant_test') as conn:
+            assignment = conn.execute('''INSERT INTO assessment_assignments
+                (doctor_id,patient_id,assessment_id,assessment_version_id,payment_required,assignment_status)
+                VALUES(%s,%s,%s,%s,FALSE,'ASSIGNED') RETURNING id''',
+                (doctor['id'],patient['id'],uuid4(),uuid4())).fetchone()[0]
+        with patch('app.patient_assessments.get_tenant_connection',
+                   side_effect=lambda _: psycopg.connect(self.base+' dbname=tenant_test')):
+            with self.assertRaises(HTTPException) as pending:
+                accessible_assignment(user, assignment)
+            self.assertEqual(pending.exception.status_code,403)
+            with psycopg.connect(self.base+' dbname=tenant_test') as conn:
+                conn.execute('''INSERT INTO assessment_access
+                    (assignment_id,patient_id,status,payment_verified_at,consent_verified_at)
+                    VALUES(%s,%s,'ACTIVE',NOW(),NOW())''', (assignment,patient['id']))
+            self.assertTrue(accessible_assignment(user, assignment)['allowed'])
+            foreign = SimpleNamespace(user_id=uuid4(), tenant=self.tenant)
+            with self.assertRaises(HTTPException) as denied:
+                accessible_assignment(foreign, assignment)
+            self.assertEqual(denied.exception.status_code,404)
+            with psycopg.connect(self.base+' dbname=tenant_test') as conn:
+                conn.execute("UPDATE assessment_access SET status='REVOKED', revoked_at=NOW() WHERE assignment_id=%s", (assignment,))
+            with self.assertRaises(HTTPException) as revoked:
+                accessible_assignment(user, assignment)
+            self.assertEqual(revoked.exception.status_code,403)

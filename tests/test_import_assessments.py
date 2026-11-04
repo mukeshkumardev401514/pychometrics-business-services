@@ -46,6 +46,15 @@ class AssessmentImportTests(unittest.TestCase):
                 money(value, 'percentage', Decimal(100))
         self.assertEqual(money('70.25', 'percentage', Decimal(100)), Decimal('70.25'))
 
+    def test_optional_subcategory_validation(self):
+        self.assertEqual(normalize(self.record(assessment_subcategory=' Social Anxiety '))[0]['_subcategory_name'],
+                         'Social Anxiety')
+        for value in (None, '', ' '):
+            self.assertIsNone(normalize(self.record(assessment_subcategory=value))[0]['_subcategory_name'])
+        for value in (42, True, 'a' * 256):
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                normalize(self.record(assessment_subcategory=value))
+
 
 if __name__ == '__main__':
     unittest.main()

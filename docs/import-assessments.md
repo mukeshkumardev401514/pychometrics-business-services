@@ -1,7 +1,7 @@
 # Assessment JSON import
 
 Run from the repository root using the Python environment containing `psycopg`
-(version 3) and `python-dotenv`. Requires platform migrations through V030.
+(version 3) and `python-dotenv`. Requires platform migrations through V031.
 Uses `PLATFORM_DB_HOST`, `PLATFORM_DB_PORT`, `PLATFORM_DB_NAME`,
 `PLATFORM_DB_USER`, `PLATFORM_DB_PASSWORD` from the environment or root `.env`.
 
@@ -60,3 +60,10 @@ The entire batch uses one transaction: any failure rolls back all its changes.
 `--dry-run` performs the database writes and validations but rolls back the
 transaction. `--validate-only` checks input without database access; it cannot
 validate migration state, existing categories, or pricing configuration.
+
+## Sub-category support
+
+Apply platform migration V031 before importing. Optional JSON field `assessment_subcategory`
+creates/reuses a sub-category under `assessment_category`. Blank/missing values clear the
+assessment's sub-category on re-import. Sub-category names are matched case-insensitively
+within their category.

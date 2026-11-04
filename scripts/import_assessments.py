@@ -41,7 +41,7 @@ def normalize(record):
     if not isinstance(record, dict):
         raise ValueError('Each assessment must be a JSON object')
     unknown = set(record) - set(FIELD_MAP) - {
-        'assessment_category', 'assessment_duration', 'assessment_cost',
+        'assessment_category', 'assessment_subcategory', 'assessment_duration', 'assessment_cost',
     }
     if unknown:
         raise ValueError(f'Unknown fields: {", ".join(sorted(unknown))}')
@@ -87,6 +87,10 @@ def normalize(record):
     if len(category) > 255 or not category_code or len(category_code) > 100:
         raise ValueError('assessment_category: invalid name or generated code')
     price = record.get('assessment_cost')
+    subcategory = record.get('assessment_subcategory')
+    if subcategory is not None and (not isinstance(subcategory, str) or len(subcategory.strip()) > 255):
+        raise ValueError('assessment_subcategory: text with maximum length 255 required')
+    data['_subcategory_name'] = subcategory.strip() or None if isinstance(subcategory, str) else None
     if price is not None:
         price = money(price, 'assessment_cost', Decimal('9999999999.99'))
     return data, category, category_code, record['assessment_duration'], price
@@ -116,6 +120,17 @@ def upsert(conn, item, version, doctor_percentage):
             raise ValueError(f'Category code collision: {category_code}')
         category_id = category_id[0]
     values = dict(data, category_id=category_id)
+    subcategory = values.pop('_subcategory_name', None)
+    values['subcategory_id'] = None
+    if subcategory:
+        import hashlib
+        subcategory_code = 'SUB_' + hashlib.sha256(subcategory.lower().encode()).hexdigest()
+        values['subcategory_id'] = conn.execute(
+            'INSERT INTO assessment_subcategories (category_id, code, name) VALUES (%s, %s, %s) '
+            'ON CONFLICT (category_id, lower(name)) DO UPDATE '
+            'SET updated_at = NOW() RETURNING id',
+            (category_id, subcategory_code, subcategory),
+        ).fetchone()[0]
     if values.get('charts') is not None:
         values['charts'] = Jsonb(values['charts'])
     columns = list(values)

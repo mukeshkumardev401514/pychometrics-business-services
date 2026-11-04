@@ -1,0 +1,207 @@
+{
+  "info": {
+    "name": "Assessment Assignment and Payment Flow",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Set base_url to your tenant backend URL and provide doctor/patient tokens and UUIDs. Run requests in order. Assignment creation saves assignment_id automatically. Payment confirmation requires an existing PAID platform_payments record linked to this tenant, assignment, doctor, patient, assessment and version, with paid_at set. This collection does not collect payment or create Razorpay orders. Obtain patient agreement before sending consent. Restart backend after installing the new routes."
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "doctor_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "patient_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "doctor_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "patient_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "assessment_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "assessment_version_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "assignment_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "platform_payment_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Doctor - Assign assessment",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{doctor_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "url": "{{base_url}}/data/assessment-assignments",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"doctor_id\": \"{{doctor_id}}\",\n  \"patient_id\": \"{{patient_id}}\",\n  \"assessment_id\": \"{{assessment_id}}\",\n  \"assessment_version_id\": \"{{assessment_version_id}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.response.code >= 200 && pm.response.code < 300) {",
+              "  const body = pm.response.json();",
+              "  if (body.id) pm.collectionVariables.set(\"assignment_id\", body.id);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Doctor - Confirm existing paid payment",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{doctor_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "url": "{{base_url}}/assessment-assignments/{{assignment_id}}/payment/confirm",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"payment_id\": \"{{platform_payment_id}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "3. Patient - Give assessment consent",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{patient_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "url": "{{base_url}}/assessment-assignments/{{assignment_id}}/consent",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"granted\": true,\n  \"consent_version\": \"1.0\",\n  \"consent_text\": \"I consent to take this assessment.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "4. Patient - List assigned assessments and payment status",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{patient_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "url": "{{base_url}}/patient/assessments?limit=100&offset=0"
+      },
+      "response": []
+    },
+    {
+      "name": "5. Patient - Get assigned assessment questions",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{patient_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "url": "{{base_url}}/patient/assessments/{{assignment_id}}/questions?limit=100&offset=0"
+      },
+      "response": []
+    }
+  ]
+}

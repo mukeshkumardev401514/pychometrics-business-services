@@ -219,3 +219,6 @@ __marimo__/
 .streamlit/secrets.toml
 postman/doctors.postman_collection.json
 postman/psychometrics-all-apis.postman_collection.json
+psychometric-db-models/*
+psychometric-db-models/
+psychometric-db-models

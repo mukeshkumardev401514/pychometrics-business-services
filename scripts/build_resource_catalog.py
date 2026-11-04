@@ -72,6 +72,8 @@ def compile_catalog():
         if scope == 'platform':
             tables['assessments']['columns']['category_id'] = {'type': 'uuid', 'nullable': True, 'default': False}
             tables['assessments']['foreign_keys'].append({'column': 'category_id', 'table': 'assessment_categories', 'target': 'id'})
+            tables['assessments']['columns']['subcategory_id'] = {'type': 'uuid', 'nullable': True, 'default': False}
+            tables['assessments']['foreign_keys'].append({'column': 'subcategory_id', 'table': 'assessment_subcategories', 'target': 'id'})
             metadata = (ROOT / 'psychometric-db-models/platform/V030__assessment_metadata.sql').read_text()
             for name, dtype in re.findall(r'ADD COLUMN (\w+) (VARCHAR\(\d+\)|TEXT|INTEGER|JSONB|BOOLEAN)', metadata):
                 tables['assessments']['columns'][name] = {'type': dtype.lower(), 'nullable': True, 'default': False}

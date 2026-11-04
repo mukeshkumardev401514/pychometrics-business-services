@@ -375,6 +375,11 @@
           "nullable": true,
           "default": false
         },
+        "subcategory_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
         "full_name": {
           "type": "varchar(500)",
           "nullable": true,
@@ -448,6 +453,11 @@
         {
           "column": "category_id",
           "table": "assessment_categories",
+          "target": "id"
+        },
+        {
+          "column": "subcategory_id",
+          "table": "assessment_subcategories",
           "target": "id"
         }
       ]
@@ -1675,6 +1685,70 @@
         {
           "column": "payment_id",
           "table": "platform_payments",
+          "target": "id"
+        }
+      ]
+    },
+    "assessment_subcategories": {
+      "source": "psychometric-db-models/platform/V031__assessment_subcategories.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "category_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "code": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "default": false
+        },
+        "name": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "default": false
+        },
+        "description": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "display_order": {
+          "type": "integer",
+          "nullable": false,
+          "default": true
+        },
+        "status": {
+          "type": "assessment_category_status",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "ACTIVE",
+            "INACTIVE"
+          ]
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "category_id",
+          "table": "assessment_categories",
           "target": "id"
         }
       ]

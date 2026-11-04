@@ -1,0 +1,19 @@
+[
+        {
+            "assessment_id": "PSY-0134",
+            "assessment_category": "Anxiety",
+            "assessment_name": "LSAS",
+            "assessment_full_name": "Liebowitz Social Anxiety Scale",
+            "copyright": " ",
+            "description": "Liebowitz Social Anxiety Scale (LSAS) is a psychological assessment tool specifically designed to evaluate the range and severity of social anxiety disorder (SAD) symptoms. Introduced by Dr. Michael R. Liebowitz in 1987, the scale addresses the need for a comprehensive measure to adequately reflect the complex nature of social anxiety.\n\nThe LSAS distinguishes itself by assessing not only the fear associated with social interaction and performance situations, but also the avoidance behaviors that often accompany such fears. This dual focus provides a more complete view of social anxiety, encapsulating both the emotional distress and the consequential behavioral adaptations that characterize the disorder.",
+            "min_age": 0,
+            "max_age": 130,
+            "typical_groups": "for all age group",
+            "assessment_duration": 60,
+            "assessment_cost": null,
+            "charts": "Pie Chart, Histogram Chart, Line Chart Stacked",
+            "domain_charts": "Y",
+            "t_score": "N",
+            "domain_t_score": "N"
+        }
+    ]
