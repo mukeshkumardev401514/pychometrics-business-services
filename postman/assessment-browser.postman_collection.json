@@ -1,0 +1,700 @@
+{
+  "info": {
+    "name": "Psychometrics - Doctor Owner and Patient Assessments",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Apply V031. Doctor or platform owner: login using the corresponding request; browser_token is saved automatically. Set tenant_code and login credentials. Doctor needs ASSESSMENT_ASSIGN permission. Both roles can browse draft content and scores. Patient: login separately, list own assignments, then read assigned questions. Patient content requires published assessment/version, ASSIGNED/IN_PROGRESS status, unexpired assignment and ACTIVE assessment_access with verified payment/consent. Scoring keys are not returned to patients. Assignment creation uses doctor_token and the existing /data API; pending payment assignments do not immediately unlock content. Set patient_id, doctor_id, assessment_id and version_id before assigning. Clear secrets before sharing collection exports."
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{browser_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "assessment_code",
+      "value": "PSY-0134",
+      "type": "string"
+    },
+    {
+      "key": "version_number",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "category_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "subcategory_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "assessment_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "version_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "domain_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "sub_domain_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "limit",
+      "value": "100",
+      "type": "string"
+    },
+    {
+      "key": "offset",
+      "value": "0",
+      "type": "string"
+    },
+    {
+      "key": "tenant_code",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "doctor_email",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "doctor_password",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "doctor_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "browser_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "owner_email",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "owner_password",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "owner_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "patient_email",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "patient_password",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "patient_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "patient_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "doctor_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "assignment_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1 Authentication",
+      "item": [
+        {
+          "name": "Doctor login",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/login",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{doctor_email}}\",\n  \"password\": \"{{doctor_password}}\",\n  \"tenant_code\": \"{{tenant_code}}\"\n}"
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.unset(\"doctor_token\");",
+                  "pm.collectionVariables.unset(\"browser_token\");",
+                  "pm.test(\"Login role\", () => { pm.response.to.have.status(200); pm.expect(pm.response.json().role).to.eql(\"DOCTOR\"); });",
+                  "if (pm.response.code === 200 && pm.response.json().role === \"DOCTOR\") {",
+                  "pm.collectionVariables.set(\"doctor_token\", pm.response.json().access_token);",
+                  "pm.collectionVariables.set(\"browser_token\", pm.response.json().access_token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Platform owner login",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/platform/auth/login",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{owner_email}}\",\n  \"password\": \"{{owner_password}}\"\n}"
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.unset(\"owner_token\");",
+                  "pm.collectionVariables.unset(\"browser_token\");",
+                  "pm.test(\"Login role\", () => { pm.response.to.have.status(200); pm.expect(pm.response.json().role).to.eql(\"PLATFORM_ADMIN\"); });",
+                  "if (pm.response.code === 200 && pm.response.json().role === \"PLATFORM_ADMIN\") {",
+                  "pm.collectionVariables.set(\"owner_token\", pm.response.json().access_token);",
+                  "pm.collectionVariables.set(\"browser_token\", pm.response.json().access_token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Patient login",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/auth/login",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{patient_email}}\",\n  \"password\": \"{{patient_password}}\",\n  \"tenant_code\": \"{{tenant_code}}\"\n}"
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.unset(\"patient_token\");",
+                  "pm.test(\"Login role\", () => { pm.response.to.have.status(200); pm.expect(pm.response.json().role).to.eql(\"PATIENT\"); });",
+                  "if (pm.response.code === 200 && pm.response.json().role === \"PATIENT\") {",
+                  "pm.collectionVariables.set(\"patient_token\", pm.response.json().access_token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2 Browse and verify imported data",
+      "item": [
+        {
+          "name": "02 All categories",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/platform/assessment-browser/categories?limit={{limit}}&offset={{offset}}",
+            "header": [],
+            "description": "Saves first category_id. Set another category_id manually if needed."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "  pm.collectionVariables.unset(\"category_id\");",
+                  "  const items = pm.response.json().items || [];",
+                  "  if (items.length) pm.collectionVariables.set(\"category_id\", items[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "03 All sub-categories",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/platform/assessment-browser/sub-categories?limit={{limit}}&offset={{offset}}",
+            "header": [],
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "04 Sub-categories by category",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/platform/assessment-browser/sub-categories?category_id={{category_id}}&limit={{limit}}&offset={{offset}}",
+            "header": [],
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "  pm.collectionVariables.unset(\"subcategory_id\");",
+                  "  const items = pm.response.json().items || [];",
+                  "  if (items.length) pm.collectionVariables.set(\"subcategory_id\", items[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "05 All assessments",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/platform/assessment-browser/assessments?limit={{limit}}&offset={{offset}}",
+            "header": [],
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "06 Assessments by category",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/platform/assessment-browser/assessments?category_id={{category_id}}&limit={{limit}}&offset={{offset}}",
+            "header": [],
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "07 Assessments by sub-category",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/platform/assessment-browser/assessments?subcategory_id={{subcategory_id}}&limit={{limit}}&offset={{offset}}",
+            "header": [],
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "08 Find imported assessment by code",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/platform/assessment-browser/assessments?code={{assessment_code}}&limit={{limit}}&offset={{offset}}",
+            "header": [],
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "  pm.collectionVariables.unset(\"assessment_id\");",
+                  "  const items = pm.response.json().items || [];",
+                  "  if (items.length) pm.collectionVariables.set(\"assessment_id\", items[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "09 Assessment metadata and versions",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/platform/assessment-browser/assessments/{{assessment_id}}",
+            "header": [],
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "  pm.collectionVariables.unset(\"version_id\");",
+                  "  const versions = pm.response.json().versions || [];",
+                  "  const selected = versions.find(v => String(v.version_number) === pm.collectionVariables.get(\"version_number\"));",
+                  "  if (selected) pm.collectionVariables.set(\"version_id\", selected.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "10 Version counts and pricing",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/platform/assessment-browser/versions/{{version_id}}",
+            "header": [],
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "11 Domains",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/platform/assessment-browser/versions/{{version_id}}/domains?limit={{limit}}&offset={{offset}}",
+            "header": [],
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "  pm.collectionVariables.unset(\"domain_id\");",
+                  "  const items = pm.response.json().items || [];",
+                  "  if (items.length) pm.collectionVariables.set(\"domain_id\", items[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "12 All sub-domains",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/platform/assessment-browser/versions/{{version_id}}/sub-domains?limit={{limit}}&offset={{offset}}",
+            "header": [],
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "13 Sub-domains by domain",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/platform/assessment-browser/versions/{{version_id}}/sub-domains?domain_id={{domain_id}}&limit={{limit}}&offset={{offset}}",
+            "header": [],
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "  pm.collectionVariables.unset(\"sub_domain_id\");",
+                  "  const items = pm.response.json().items || [];",
+                  "  if (items.length) pm.collectionVariables.set(\"sub_domain_id\", items[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "14 Questions options and weightage",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/platform/assessment-browser/versions/{{version_id}}/questions?limit={{limit}}&offset={{offset}}",
+            "header": [],
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "15 Questions by domain",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/platform/assessment-browser/versions/{{version_id}}/questions?domain_id={{domain_id}}&limit={{limit}}&offset={{offset}}",
+            "header": [],
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "16 Questions by sub-domain",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/platform/assessment-browser/versions/{{version_id}}/questions?sub_domain_id={{sub_domain_id}}&limit={{limit}}&offset={{offset}}",
+            "header": [],
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "17 Questions by domain and sub-domain",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/platform/assessment-browser/versions/{{version_id}}/questions?domain_id={{domain_id}}&sub_domain_id={{sub_domain_id}}&limit={{limit}}&offset={{offset}}",
+            "header": [],
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3 Doctor assigns assessment",
+      "item": [
+        {
+          "name": "Assign assessment to linked patient",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/data/assessment-assignments",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{doctor_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"doctor_id\": \"{{doctor_id}}\",\n  \"patient_id\": \"{{patient_id}}\",\n  \"assessment_id\": \"{{assessment_id}}\",\n  \"assessment_version_id\": \"{{version_id}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) pm.collectionVariables.set(\"assignment_id\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4 Patient assigned content",
+      "item": [
+        {
+          "name": "My assessment assignments",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/patient/assessments?limit={{limit}}&offset={{offset}}",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{patient_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "My assigned questions and options",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/patient/assessments/{{assignment_id}}/questions?limit={{limit}}&offset={{offset}}",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{patient_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

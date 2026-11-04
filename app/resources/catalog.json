@@ -1,0 +1,5146 @@
+{
+  "platform": {
+    "schema_migrations": {
+      "source": "psychometric-db-models/platform/V000__migration_history.sql",
+      "columns": {
+        "version": {
+          "type": "varchar(20)",
+          "nullable": false,
+          "default": false
+        },
+        "filename": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "default": false
+        },
+        "checksum": {
+          "type": "varchar(64)",
+          "nullable": false,
+          "default": false
+        },
+        "applied_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "version"
+      ],
+      "foreign_keys": []
+    },
+    "platform_users": {
+      "source": "psychometric-db-models/platform/V003__platform_users.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "email": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "default": false
+        },
+        "password_hash": {
+          "type": "text",
+          "nullable": false,
+          "default": false
+        },
+        "first_name": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "default": false
+        },
+        "last_name": {
+          "type": "varchar(100)",
+          "nullable": true,
+          "default": false
+        },
+        "status": {
+          "type": "user_status",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "ACTIVE",
+            "INACTIVE",
+            "LOCKED"
+          ]
+        },
+        "last_login_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": []
+    },
+    "tenants": {
+      "source": "psychometric-db-models/platform/V004__tenants.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "tenant_code": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "default": false
+        },
+        "tenant_name": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "default": false
+        },
+        "tenant_type": {
+          "type": "tenant_type",
+          "nullable": false,
+          "default": false,
+          "enum": [
+            "HOSPITAL_ORGANIZATION",
+            "INDIVIDUAL_DOCTOR"
+          ]
+        },
+        "status": {
+          "type": "tenant_status",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "PROVISIONING",
+            "ACTIVE",
+            "SUSPENDED",
+            "INACTIVE"
+          ]
+        },
+        "database_name": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": []
+    },
+    "tenant_domains": {
+      "source": "psychometric-db-models/platform/V005__tenant_domains.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "tenant_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "domain": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "default": false
+        },
+        "is_primary": {
+          "type": "boolean",
+          "nullable": false,
+          "default": true
+        },
+        "status": {
+          "type": "varchar(30)",
+          "nullable": false,
+          "default": true
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "tenant_id",
+          "table": "tenants",
+          "target": "id"
+        }
+      ]
+    },
+    "tenant_database_config": {
+      "source": "psychometric-db-models/platform/V006__tenant_database_config.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "tenant_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "database_name": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "default": false
+        },
+        "host": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "default": false
+        },
+        "port": {
+          "type": "integer",
+          "nullable": false,
+          "default": true
+        },
+        "username": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "default": false
+        },
+        "secret_reference": {
+          "type": "varchar(500)",
+          "nullable": true,
+          "default": false
+        },
+        "status": {
+          "type": "varchar(30)",
+          "nullable": false,
+          "default": true
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "tenant_id",
+          "table": "tenants",
+          "target": "id"
+        }
+      ]
+    },
+    "tenant_provisioning_history": {
+      "source": "psychometric-db-models/platform/V007__tenant_provisioning_history.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "tenant_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "database_name": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "default": false
+        },
+        "operation": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "default": false
+        },
+        "status": {
+          "type": "provisioning_status",
+          "nullable": false,
+          "default": false,
+          "enum": [
+            "STARTED",
+            "SUCCESS",
+            "FAILED"
+          ]
+        },
+        "started_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "completed_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "error_message": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "tenant_id",
+          "table": "tenants",
+          "target": "id"
+        }
+      ]
+    },
+    "assessments": {
+      "source": "psychometric-db-models/platform/V009__assessments.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "code": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "default": false
+        },
+        "name": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "default": false
+        },
+        "description": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "status": {
+          "type": "assessment_status",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "DRAFT",
+            "PUBLISHED",
+            "ARCHIVED"
+          ]
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "category_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "subcategory_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "full_name": {
+          "type": "varchar(500)",
+          "nullable": true,
+          "default": false
+        },
+        "copyright": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "purpose_or_domain": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "min_age": {
+          "type": "integer",
+          "nullable": true,
+          "default": false
+        },
+        "max_age": {
+          "type": "integer",
+          "nullable": true,
+          "default": false
+        },
+        "typical_groups": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "format": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "notes_publisher": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "reference_and_additional_notes": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "charts": {
+          "type": "jsonb",
+          "nullable": true,
+          "default": false
+        },
+        "domain_charts": {
+          "type": "boolean",
+          "nullable": true,
+          "default": false
+        },
+        "t_score": {
+          "type": "boolean",
+          "nullable": true,
+          "default": false
+        },
+        "domain_t_score": {
+          "type": "boolean",
+          "nullable": true,
+          "default": false
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "category_id",
+          "table": "assessment_categories",
+          "target": "id"
+        },
+        {
+          "column": "subcategory_id",
+          "table": "assessment_subcategories",
+          "target": "id"
+        }
+      ]
+    },
+    "assessment_versions": {
+      "source": "psychometric-db-models/platform/V010__assessment_versions.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "assessment_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "version_number": {
+          "type": "integer",
+          "nullable": false,
+          "default": false
+        },
+        "duration_minutes": {
+          "type": "integer",
+          "nullable": false,
+          "default": false
+        },
+        "status": {
+          "type": "assessment_version_status",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "DRAFT",
+            "PUBLISHED",
+            "ARCHIVED"
+          ]
+        },
+        "published_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "assessment_id",
+          "table": "assessments",
+          "target": "id"
+        }
+      ]
+    },
+    "assessment_sections": {
+      "source": "psychometric-db-models/platform/V011__assessment_sections.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "assessment_version_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "name": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "default": false
+        },
+        "description": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "display_order": {
+          "type": "integer",
+          "nullable": false,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "assessment_version_id",
+          "table": "assessment_versions",
+          "target": "id"
+        }
+      ]
+    },
+    "questions": {
+      "source": "psychometric-db-models/platform/V012__questions.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "assessment_section_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "question_text": {
+          "type": "text",
+          "nullable": false,
+          "default": false
+        },
+        "question_type": {
+          "type": "question_type",
+          "nullable": false,
+          "default": false,
+          "enum": [
+            "SINGLE_CHOICE",
+            "MULTIPLE_CHOICE",
+            "TEXT",
+            "SCALE",
+            "YES_NO"
+          ]
+        },
+        "display_order": {
+          "type": "integer",
+          "nullable": false,
+          "default": false
+        },
+        "is_required": {
+          "type": "boolean",
+          "nullable": false,
+          "default": true
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "assessment_section_id",
+          "table": "assessment_sections",
+          "target": "id"
+        }
+      ]
+    },
+    "question_options": {
+      "source": "psychometric-db-models/platform/V013__question_options.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "question_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "option_text": {
+          "type": "varchar(500)",
+          "nullable": false,
+          "default": false
+        },
+        "option_value": {
+          "type": "varchar(100)",
+          "nullable": true,
+          "default": false
+        },
+        "display_order": {
+          "type": "integer",
+          "nullable": false,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "question_id",
+          "table": "questions",
+          "target": "id"
+        }
+      ]
+    },
+    "assessment_dimensions": {
+      "source": "psychometric-db-models/platform/V014__assessment_dimensions.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "assessment_version_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "code": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "default": false
+        },
+        "name": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "default": false
+        },
+        "description": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "display_order": {
+          "type": "integer",
+          "nullable": false,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "assessment_version_id",
+          "table": "assessment_versions",
+          "target": "id"
+        }
+      ]
+    },
+    "question_option_scores": {
+      "source": "psychometric-db-models/platform/V015__question_option_scores.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "question_option_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "dimension_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "score": {
+          "type": "numeric(10,2)",
+          "nullable": false,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "question_option_id",
+          "table": "question_options",
+          "target": "id"
+        },
+        {
+          "column": "dimension_id",
+          "table": "assessment_dimensions",
+          "target": "id"
+        }
+      ]
+    },
+    "scoring_rules": {
+      "source": "psychometric-db-models/platform/V016__scoring_rules.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "assessment_version_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "dimension_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "min_score": {
+          "type": "numeric(10,2)",
+          "nullable": false,
+          "default": false
+        },
+        "max_score": {
+          "type": "numeric(10,2)",
+          "nullable": false,
+          "default": false
+        },
+        "result_label": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "default": false
+        },
+        "interpretation": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "recommendation": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "assessment_version_id",
+          "table": "assessment_versions",
+          "target": "id"
+        },
+        {
+          "column": "dimension_id",
+          "table": "assessment_dimensions",
+          "target": "id"
+        }
+      ]
+    },
+    "assessment_pricing": {
+      "source": "psychometric-db-models/platform/V017__assessment_pricing.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "assessment_version_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "price": {
+          "type": "numeric(12,2)",
+          "nullable": false,
+          "default": false
+        },
+        "currency": {
+          "type": "varchar(3)",
+          "nullable": false,
+          "default": true
+        },
+        "doctor_percentage": {
+          "type": "numeric(5,2)",
+          "nullable": false,
+          "default": false
+        },
+        "platform_percentage": {
+          "type": "numeric(5,2)",
+          "nullable": false,
+          "default": false
+        },
+        "effective_from": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "effective_to": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "status": {
+          "type": "pricing_status",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "ACTIVE",
+            "INACTIVE"
+          ]
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "assessment_version_id",
+          "table": "assessment_versions",
+          "target": "id"
+        }
+      ]
+    },
+    "assessment_categories": {
+      "source": "psychometric-db-models/platform/V018__assessment_categories.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "code": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "default": false
+        },
+        "name": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "default": false
+        },
+        "description": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "display_order": {
+          "type": "integer",
+          "nullable": false,
+          "default": true
+        },
+        "status": {
+          "type": "assessment_category_status",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "ACTIVE",
+            "INACTIVE"
+          ]
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": []
+    },
+    "subscription_plans": {
+      "source": "psychometric-db-models/platform/V021__subscription_plans.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "code": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "default": false
+        },
+        "name": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "default": false
+        },
+        "description": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "price": {
+          "type": "numeric(12,2)",
+          "nullable": false,
+          "default": false
+        },
+        "currency": {
+          "type": "varchar(3)",
+          "nullable": false,
+          "default": true
+        },
+        "billing_interval": {
+          "type": "billing_interval",
+          "nullable": false,
+          "default": false,
+          "enum": [
+            "MONTHLY",
+            "YEARLY"
+          ]
+        },
+        "status": {
+          "type": "subscription_plan_status",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "ACTIVE",
+            "INACTIVE"
+          ]
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": []
+    },
+    "tenant_subscriptions": {
+      "source": "psychometric-db-models/platform/V022__tenant_subscriptions.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "tenant_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "subscription_plan_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "status": {
+          "type": "subscription_status",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "TRIAL",
+            "ACTIVE",
+            "PAST_DUE",
+            "SUSPENDED",
+            "CANCELLED",
+            "EXPIRED"
+          ]
+        },
+        "start_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": false
+        },
+        "end_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "razorpay_subscription_id": {
+          "type": "varchar(255)",
+          "nullable": true,
+          "default": false
+        },
+        "auto_renew": {
+          "type": "boolean",
+          "nullable": false,
+          "default": true
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "tenant_id",
+          "table": "tenants",
+          "target": "id"
+        },
+        {
+          "column": "subscription_plan_id",
+          "table": "subscription_plans",
+          "target": "id"
+        }
+      ]
+    },
+    "platform_payments": {
+      "source": "psychometric-db-models/platform/V023__platform_payments.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "tenant_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "assessment_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "assessment_version_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "assignment_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "doctor_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "patient_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "amount": {
+          "type": "numeric(12,2)",
+          "nullable": false,
+          "default": false
+        },
+        "currency": {
+          "type": "varchar(3)",
+          "nullable": false,
+          "default": true
+        },
+        "doctor_percentage": {
+          "type": "numeric(5,2)",
+          "nullable": false,
+          "default": false
+        },
+        "platform_percentage": {
+          "type": "numeric(5,2)",
+          "nullable": false,
+          "default": false
+        },
+        "doctor_amount": {
+          "type": "numeric(12,2)",
+          "nullable": false,
+          "default": false
+        },
+        "platform_amount": {
+          "type": "numeric(12,2)",
+          "nullable": false,
+          "default": false
+        },
+        "status": {
+          "type": "payment_status",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "CREATED",
+            "PENDING",
+            "PAID",
+            "FAILED",
+            "CANCELLED",
+            "REFUNDED",
+            "PARTIALLY_REFUNDED"
+          ]
+        },
+        "razorpay_order_id": {
+          "type": "varchar(255)",
+          "nullable": true,
+          "default": false
+        },
+        "razorpay_payment_id": {
+          "type": "varchar(255)",
+          "nullable": true,
+          "default": false
+        },
+        "razorpay_signature": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "paid_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "failure_reason": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "tenant_id",
+          "table": "tenants",
+          "target": "id"
+        }
+      ]
+    },
+    "payment_events": {
+      "source": "psychometric-db-models/platform/V024__payment_events.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "payment_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "razorpay_event_id": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "default": false
+        },
+        "event_type": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "default": false
+        },
+        "payload": {
+          "type": "jsonb",
+          "nullable": false,
+          "default": false
+        },
+        "status": {
+          "type": "payment_event_status",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "RECEIVED",
+            "PROCESSED",
+            "FAILED",
+            "IGNORED"
+          ]
+        },
+        "processed_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "error_message": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "payment_id",
+          "table": "platform_payments",
+          "target": "id"
+        }
+      ]
+    },
+    "payment_refunds": {
+      "source": "psychometric-db-models/platform/V025__payment_refunds.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "payment_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "amount": {
+          "type": "numeric(12,2)",
+          "nullable": false,
+          "default": false
+        },
+        "currency": {
+          "type": "varchar(3)",
+          "nullable": false,
+          "default": true
+        },
+        "razorpay_refund_id": {
+          "type": "varchar(255)",
+          "nullable": true,
+          "default": false
+        },
+        "reason": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "status": {
+          "type": "payment_status",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "CREATED",
+            "PENDING",
+            "PAID",
+            "FAILED",
+            "CANCELLED",
+            "REFUNDED",
+            "PARTIALLY_REFUNDED"
+          ]
+        },
+        "refunded_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "payment_id",
+          "table": "platform_payments",
+          "target": "id"
+        }
+      ]
+    },
+    "doctor_payout_accounts": {
+      "source": "psychometric-db-models/platform/V026__doctor_payout_accounts.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "tenant_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "doctor_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "payout_method": {
+          "type": "payout_method",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "UPI"
+          ]
+        },
+        "upi_id": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "default": false
+        },
+        "account_holder_name": {
+          "type": "varchar(255)",
+          "nullable": true,
+          "default": false
+        },
+        "status": {
+          "type": "payout_account_status",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "PENDING_VERIFICATION",
+            "VERIFIED",
+            "SUSPENDED"
+          ]
+        },
+        "verified_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "tenant_id",
+          "table": "tenants",
+          "target": "id"
+        }
+      ]
+    },
+    "payout_batches": {
+      "source": "psychometric-db-models/platform/V027__payout_batches.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "batch_date": {
+          "type": "date",
+          "nullable": false,
+          "default": false
+        },
+        "payout_mode": {
+          "type": "payout_mode",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "PER_TRANSACTION",
+            "DAILY_BATCH"
+          ]
+        },
+        "status": {
+          "type": "payout_status",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "PENDING",
+            "PROCESSING",
+            "PAID",
+            "FAILED",
+            "CANCELLED"
+          ]
+        },
+        "total_amount": {
+          "type": "numeric(12,2)",
+          "nullable": false,
+          "default": true
+        },
+        "total_doctor_count": {
+          "type": "integer",
+          "nullable": false,
+          "default": true
+        },
+        "processed_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": []
+    },
+    "doctor_payouts": {
+      "source": "psychometric-db-models/platform/V028__doctor_payouts.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "payout_batch_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "tenant_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "doctor_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "payout_account_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "payout_mode": {
+          "type": "payout_mode",
+          "nullable": false,
+          "default": false,
+          "enum": [
+            "PER_TRANSACTION",
+            "DAILY_BATCH"
+          ]
+        },
+        "amount": {
+          "type": "numeric(12,2)",
+          "nullable": false,
+          "default": false
+        },
+        "currency": {
+          "type": "varchar(3)",
+          "nullable": false,
+          "default": true
+        },
+        "status": {
+          "type": "payout_status",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "PENDING",
+            "PROCESSING",
+            "PAID",
+            "FAILED",
+            "CANCELLED"
+          ]
+        },
+        "payout_reference": {
+          "type": "varchar(255)",
+          "nullable": true,
+          "default": false
+        },
+        "processed_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "failure_reason": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "payout_batch_id",
+          "table": "payout_batches",
+          "target": "id"
+        },
+        {
+          "column": "tenant_id",
+          "table": "tenants",
+          "target": "id"
+        },
+        {
+          "column": "payout_account_id",
+          "table": "doctor_payout_accounts",
+          "target": "id"
+        }
+      ]
+    },
+    "doctor_payout_items": {
+      "source": "psychometric-db-models/platform/V029__doctor_payout_items.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "doctor_payout_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "payment_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "doctor_amount": {
+          "type": "numeric(12,2)",
+          "nullable": false,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "doctor_payout_id",
+          "table": "doctor_payouts",
+          "target": "id"
+        },
+        {
+          "column": "payment_id",
+          "table": "platform_payments",
+          "target": "id"
+        }
+      ]
+    },
+    "assessment_subcategories": {
+      "source": "psychometric-db-models/platform/V031__assessment_subcategories.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "category_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "code": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "default": false
+        },
+        "name": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "default": false
+        },
+        "description": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "display_order": {
+          "type": "integer",
+          "nullable": false,
+          "default": true
+        },
+        "status": {
+          "type": "assessment_category_status",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "ACTIVE",
+            "INACTIVE"
+          ]
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "category_id",
+          "table": "assessment_categories",
+          "target": "id"
+        }
+      ]
+    }
+  },
+  "tenant": {
+    "schema_migrations": {
+      "source": "psychometric-db-models/tenant/V000__migration_history.sql",
+      "columns": {
+        "version": {
+          "type": "varchar(20)",
+          "nullable": false,
+          "default": false
+        },
+        "filename": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "default": false
+        },
+        "checksum": {
+          "type": "varchar(64)",
+          "nullable": false,
+          "default": false
+        },
+        "applied_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "version"
+      ],
+      "foreign_keys": []
+    },
+    "roles": {
+      "source": "psychometric-db-models/tenant/V002__roles_permissions.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "code": {
+          "type": "role_code",
+          "nullable": false,
+          "default": false,
+          "enum": [
+            "HOSPITAL_ADMIN",
+            "DOCTOR",
+            "PATIENT"
+          ]
+        },
+        "name": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "default": false
+        },
+        "description": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": []
+    },
+    "permissions": {
+      "source": "psychometric-db-models/tenant/V002__roles_permissions.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "code": {
+          "type": "varchar(150)",
+          "nullable": false,
+          "default": false
+        },
+        "name": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "default": false
+        },
+        "description": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": []
+    },
+    "role_permissions": {
+      "source": "psychometric-db-models/tenant/V002__roles_permissions.sql",
+      "columns": {
+        "role_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "permission_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        }
+      },
+      "primary_key": [
+        "role_id",
+        "permission_id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "role_id",
+          "table": "roles",
+          "target": "id"
+        },
+        {
+          "column": "permission_id",
+          "table": "permissions",
+          "target": "id"
+        }
+      ]
+    },
+    "users": {
+      "source": "psychometric-db-models/tenant/V003__users.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "email": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "default": false
+        },
+        "mobile": {
+          "type": "varchar(20)",
+          "nullable": true,
+          "default": false
+        },
+        "password_hash": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "first_name": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "default": false
+        },
+        "last_name": {
+          "type": "varchar(100)",
+          "nullable": true,
+          "default": false
+        },
+        "status": {
+          "type": "tenant_user_status",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "ACTIVE",
+            "INACTIVE",
+            "LOCKED"
+          ]
+        },
+        "email_verified": {
+          "type": "boolean",
+          "nullable": false,
+          "default": true
+        },
+        "mobile_verified": {
+          "type": "boolean",
+          "nullable": false,
+          "default": true
+        },
+        "last_login_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": []
+    },
+    "user_roles": {
+      "source": "psychometric-db-models/tenant/V003__users.sql",
+      "columns": {
+        "user_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "role_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        }
+      },
+      "primary_key": [
+        "user_id",
+        "role_id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "user_id",
+          "table": "users",
+          "target": "id"
+        },
+        {
+          "column": "role_id",
+          "table": "roles",
+          "target": "id"
+        }
+      ]
+    },
+    "user_otp_verifications": {
+      "source": "psychometric-db-models/tenant/V003__users.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "user_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "otp_code": {
+          "type": "varchar(20)",
+          "nullable": false,
+          "default": false
+        },
+        "purpose": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "default": false
+        },
+        "expires_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": false
+        },
+        "verified_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "attempts": {
+          "type": "integer",
+          "nullable": false,
+          "default": true
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "user_id",
+          "table": "users",
+          "target": "id"
+        }
+      ]
+    },
+    "doctors": {
+      "source": "psychometric-db-models/tenant/V004__doctors.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "user_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "doctor_code": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "default": false
+        },
+        "specialization": {
+          "type": "varchar(255)",
+          "nullable": true,
+          "default": false
+        },
+        "qualification": {
+          "type": "varchar(255)",
+          "nullable": true,
+          "default": false
+        },
+        "medical_registration_number": {
+          "type": "varchar(100)",
+          "nullable": true,
+          "default": false
+        },
+        "registration_authority": {
+          "type": "varchar(255)",
+          "nullable": true,
+          "default": false
+        },
+        "registration_year": {
+          "type": "integer",
+          "nullable": true,
+          "default": false
+        },
+        "designation": {
+          "type": "varchar(255)",
+          "nullable": true,
+          "default": false
+        },
+        "department": {
+          "type": "varchar(255)",
+          "nullable": true,
+          "default": false
+        },
+        "experience_years": {
+          "type": "numeric(5,2)",
+          "nullable": true,
+          "default": false
+        },
+        "bio": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "is_verified": {
+          "type": "boolean",
+          "nullable": false,
+          "default": true
+        },
+        "verified_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "status": {
+          "type": "tenant_user_status",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "ACTIVE",
+            "INACTIVE",
+            "LOCKED"
+          ]
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "user_id",
+          "table": "users",
+          "target": "id"
+        }
+      ]
+    },
+    "patients": {
+      "source": "psychometric-db-models/tenant/V005__patients.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "user_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "patient_code": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "default": false
+        },
+        "date_of_birth": {
+          "type": "date",
+          "nullable": true,
+          "default": false
+        },
+        "gender": {
+          "type": "gender_code",
+          "nullable": true,
+          "default": false,
+          "enum": [
+            "MALE",
+            "FEMALE",
+            "OTHER",
+            "PREFER_NOT_TO_SAY"
+          ]
+        },
+        "address_line1": {
+          "type": "varchar(255)",
+          "nullable": true,
+          "default": false
+        },
+        "address_line2": {
+          "type": "varchar(255)",
+          "nullable": true,
+          "default": false
+        },
+        "city": {
+          "type": "varchar(100)",
+          "nullable": true,
+          "default": false
+        },
+        "state": {
+          "type": "varchar(100)",
+          "nullable": true,
+          "default": false
+        },
+        "postal_code": {
+          "type": "varchar(20)",
+          "nullable": true,
+          "default": false
+        },
+        "country": {
+          "type": "varchar(100)",
+          "nullable": true,
+          "default": true
+        },
+        "emergency_contact_name": {
+          "type": "varchar(255)",
+          "nullable": true,
+          "default": false
+        },
+        "emergency_contact_mobile": {
+          "type": "varchar(20)",
+          "nullable": true,
+          "default": false
+        },
+        "emergency_contact_relation": {
+          "type": "varchar(100)",
+          "nullable": true,
+          "default": false
+        },
+        "notes": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "status": {
+          "type": "tenant_user_status",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "ACTIVE",
+            "INACTIVE",
+            "LOCKED"
+          ]
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "user_id",
+          "table": "users",
+          "target": "id"
+        }
+      ]
+    },
+    "doctor_patients": {
+      "source": "psychometric-db-models/tenant/V006__doctor_patients.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "doctor_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "patient_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "is_primary_doctor": {
+          "type": "boolean",
+          "nullable": false,
+          "default": true
+        },
+        "assigned_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "unassigned_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "status": {
+          "type": "tenant_user_status",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "ACTIVE",
+            "INACTIVE",
+            "LOCKED"
+          ]
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "doctor_id",
+          "table": "doctors",
+          "target": "id"
+        },
+        {
+          "column": "patient_id",
+          "table": "patients",
+          "target": "id"
+        }
+      ]
+    },
+    "assessment_assignments": {
+      "source": "psychometric-db-models/tenant/V007__assessment_assignments.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "doctor_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "patient_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "assessment_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "assessment_version_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "assignment_status": {
+          "type": "assignment_status",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "PENDING_PAYMENT",
+            "ASSIGNED",
+            "IN_PROGRESS",
+            "COMPLETED",
+            "EXPIRED",
+            "CANCELLED"
+          ]
+        },
+        "assigned_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "payment_required": {
+          "type": "boolean",
+          "nullable": false,
+          "default": true
+        },
+        "payment_completed_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "started_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "completed_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "expired_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "expires_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "retry_allowed": {
+          "type": "boolean",
+          "nullable": false,
+          "default": true
+        },
+        "retry_count": {
+          "type": "integer",
+          "nullable": false,
+          "default": true
+        },
+        "max_retry_count": {
+          "type": "integer",
+          "nullable": false,
+          "default": true
+        },
+        "notes": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "doctor_id",
+          "table": "doctors",
+          "target": "id"
+        },
+        {
+          "column": "patient_id",
+          "table": "patients",
+          "target": "id"
+        }
+      ]
+    },
+    "assessment_attempts": {
+      "source": "psychometric-db-models/tenant/V008__assessment_attempts.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "assignment_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "attempt_number": {
+          "type": "integer",
+          "nullable": false,
+          "default": true
+        },
+        "status": {
+          "type": "attempt_status",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "NOT_STARTED",
+            "IN_PROGRESS",
+            "COMPLETED",
+            "EXPIRED",
+            "CANCELLED"
+          ]
+        },
+        "started_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "expires_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "completed_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "last_activity_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "submitted_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "duration_minutes": {
+          "type": "integer",
+          "nullable": false,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "assignment_id",
+          "table": "assessment_assignments",
+          "target": "id"
+        }
+      ]
+    },
+    "assessment_answers": {
+      "source": "psychometric-db-models/tenant/V009__assessment_answers.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "attempt_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "question_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "selected_option_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "answer_text": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "answer_value": {
+          "type": "numeric",
+          "nullable": true,
+          "default": false
+        },
+        "status": {
+          "type": "answer_status",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "DRAFT",
+            "LOCKED",
+            "FINAL"
+          ]
+        },
+        "answered_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "locked_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "finalised_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "attempt_id",
+          "table": "assessment_attempts",
+          "target": "id"
+        }
+      ]
+    },
+    "assessment_results": {
+      "source": "psychometric-db-models/tenant/V010__assessment_results.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "attempt_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "assignment_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "assessment_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "assessment_version_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "total_score": {
+          "type": "numeric(12,4)",
+          "nullable": true,
+          "default": false
+        },
+        "dimension_scores": {
+          "type": "jsonb",
+          "nullable": true,
+          "default": false
+        },
+        "score_details": {
+          "type": "jsonb",
+          "nullable": true,
+          "default": false
+        },
+        "status": {
+          "type": "report_status",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "GENERATING",
+            "GENERATED",
+            "FAILED"
+          ]
+        },
+        "calculated_at": {
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": false
+        },
+        "report_status": {
+          "type": "report_status",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "GENERATING",
+            "GENERATED",
+            "FAILED"
+          ]
+        },
+        "report_generated_at": {
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": false
+        },
+        "report_storage_key": {
+          "type": "text",
+          "nullable": true,
+          "default": true
+        },
+        "report_file_name": {
+          "type": "character varying(255)",
+          "nullable": true,
+          "default": true
+        },
+        "error_message": {
+          "type": "text",
+          "nullable": true,
+          "default": true
+        },
+        "created_at": {
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "assignment_id",
+          "table": "assessment_assignments",
+          "target": "id"
+        },
+        {
+          "column": "attempt_id",
+          "table": "assessment_attempts",
+          "target": "id"
+        }
+      ]
+    },
+    "assessment_result_dimensions": {
+      "source": "psychometric-db-models/tenant/V011__assessment_result_dimensions.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "result_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "dimension_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "dimension_code": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "default": false
+        },
+        "dimension_name": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "default": false
+        },
+        "raw_score": {
+          "type": "numeric(12,4)",
+          "nullable": true,
+          "default": false
+        },
+        "normalized_score": {
+          "type": "numeric(12,4)",
+          "nullable": true,
+          "default": false
+        },
+        "percentile": {
+          "type": "numeric(7,4)",
+          "nullable": true,
+          "default": false
+        },
+        "interpretation": {
+          "type": "varchar(100)",
+          "nullable": true,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "result_id",
+          "table": "assessment_results",
+          "target": "id"
+        }
+      ]
+    },
+    "followups": {
+      "source": "psychometric-db-models/tenant/V012__followups.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "doctor_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "patient_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "assignment_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "title": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "default": false
+        },
+        "purpose": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "notes": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "scheduled_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": false
+        },
+        "duration_minutes": {
+          "type": "integer",
+          "nullable": false,
+          "default": true
+        },
+        "status": {
+          "type": "followup_status",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "SCHEDULED",
+            "COMPLETED",
+            "CANCELLED",
+            "MISSED"
+          ]
+        },
+        "reminder_enabled": {
+          "type": "boolean",
+          "nullable": false,
+          "default": true
+        },
+        "reminder_minutes_before": {
+          "type": "integer",
+          "nullable": false,
+          "default": true
+        },
+        "completed_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "cancelled_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "doctor_id",
+          "table": "doctors",
+          "target": "id"
+        },
+        {
+          "column": "patient_id",
+          "table": "patients",
+          "target": "id"
+        },
+        {
+          "column": "assignment_id",
+          "table": "assessment_assignments",
+          "target": "id"
+        }
+      ]
+    },
+    "notifications": {
+      "source": "psychometric-db-models/tenant/V013__notifications.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "user_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "type": {
+          "type": "notification_type",
+          "nullable": false,
+          "default": false,
+          "enum": [
+            "EMAIL",
+            "SMS",
+            "PUSH",
+            "IN_APP"
+          ]
+        },
+        "status": {
+          "type": "notification_status",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "PENDING",
+            "SENT",
+            "FAILED",
+            "READ"
+          ]
+        },
+        "title": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "default": false
+        },
+        "message": {
+          "type": "text",
+          "nullable": false,
+          "default": false
+        },
+        "assignment_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "attempt_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "followup_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "scheduled_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "sent_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "read_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "retry_count": {
+          "type": "integer",
+          "nullable": false,
+          "default": true
+        },
+        "max_retry_count": {
+          "type": "integer",
+          "nullable": false,
+          "default": true
+        },
+        "error_message": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "metadata": {
+          "type": "jsonb",
+          "nullable": true,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "user_id",
+          "table": "users",
+          "target": "id"
+        },
+        {
+          "column": "assignment_id",
+          "table": "assessment_assignments",
+          "target": "id"
+        },
+        {
+          "column": "attempt_id",
+          "table": "assessment_attempts",
+          "target": "id"
+        },
+        {
+          "column": "followup_id",
+          "table": "followups",
+          "target": "id"
+        }
+      ]
+    },
+    "consents": {
+      "source": "psychometric-db-models/tenant/V014__consents.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "user_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "patient_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "consent_type": {
+          "type": "consent_type",
+          "nullable": false,
+          "default": false,
+          "enum": [
+            "PATIENT_CONSENT",
+            "ASSESSMENT_CONSENT",
+            "DATA_PROCESSING_CONSENT",
+            "REPORT_SHARING_CONSENT"
+          ]
+        },
+        "consent_version": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "default": false
+        },
+        "granted": {
+          "type": "boolean",
+          "nullable": false,
+          "default": false
+        },
+        "consent_text": {
+          "type": "text",
+          "nullable": false,
+          "default": false
+        },
+        "granted_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "revoked_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "ip_address": {
+          "type": "inet",
+          "nullable": true,
+          "default": false
+        },
+        "user_agent": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "assignment_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "user_id",
+          "table": "users",
+          "target": "id"
+        },
+        {
+          "column": "patient_id",
+          "table": "patients",
+          "target": "id"
+        },
+        {
+          "column": "assignment_id",
+          "table": "assessment_assignments",
+          "target": "id"
+        }
+      ]
+    },
+    "audit_logs": {
+      "source": "psychometric-db-models/tenant/V015__audit_logs.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "user_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "action": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "default": false
+        },
+        "entity_type": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "default": false
+        },
+        "entity_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "description": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "old_data": {
+          "type": "jsonb",
+          "nullable": true,
+          "default": false
+        },
+        "new_data": {
+          "type": "jsonb",
+          "nullable": true,
+          "default": false
+        },
+        "ip_address": {
+          "type": "inet",
+          "nullable": true,
+          "default": false
+        },
+        "user_agent": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "request_id": {
+          "type": "varchar(100)",
+          "nullable": true,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "user_id",
+          "table": "users",
+          "target": "id"
+        }
+      ]
+    },
+    "tenant_settings": {
+      "source": "psychometric-db-models/tenant/V016__tenant_settings.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "setting_key": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "default": false
+        },
+        "setting_value": {
+          "type": "jsonb",
+          "nullable": false,
+          "default": false
+        },
+        "description": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "is_active": {
+          "type": "boolean",
+          "nullable": false,
+          "default": true
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": []
+    },
+    "user_settings": {
+      "source": "psychometric-db-models/tenant/V017__user_settings.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "user_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "timezone": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "default": true
+        },
+        "language_code": {
+          "type": "varchar(10)",
+          "nullable": false,
+          "default": true
+        },
+        "email_notifications_enabled": {
+          "type": "boolean",
+          "nullable": false,
+          "default": true
+        },
+        "sms_notifications_enabled": {
+          "type": "boolean",
+          "nullable": false,
+          "default": true
+        },
+        "push_notifications_enabled": {
+          "type": "boolean",
+          "nullable": false,
+          "default": true
+        },
+        "in_app_notifications_enabled": {
+          "type": "boolean",
+          "nullable": false,
+          "default": true
+        },
+        "assessment_reminders_enabled": {
+          "type": "boolean",
+          "nullable": false,
+          "default": true
+        },
+        "followup_reminders_enabled": {
+          "type": "boolean",
+          "nullable": false,
+          "default": true
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "user_id",
+          "table": "users",
+          "target": "id"
+        }
+      ]
+    },
+    "password_reset_tokens": {
+      "source": "psychometric-db-models/tenant/V018__password_reset_tokens.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "user_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "token_hash": {
+          "type": "text",
+          "nullable": false,
+          "default": false
+        },
+        "expires_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": false
+        },
+        "used_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "ip_address": {
+          "type": "inet",
+          "nullable": true,
+          "default": false
+        },
+        "user_agent": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "user_id",
+          "table": "users",
+          "target": "id"
+        }
+      ]
+    },
+    "organization_profile": {
+      "source": "psychometric-db-models/tenant/V019__organization_profile.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "organization_name": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "default": false
+        },
+        "organization_code": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "default": false
+        },
+        "organization_type": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "default": true
+        },
+        "registration_number": {
+          "type": "varchar(150)",
+          "nullable": true,
+          "default": false
+        },
+        "email": {
+          "type": "varchar(255)",
+          "nullable": true,
+          "default": false
+        },
+        "mobile": {
+          "type": "varchar(20)",
+          "nullable": true,
+          "default": false
+        },
+        "phone": {
+          "type": "varchar(20)",
+          "nullable": true,
+          "default": false
+        },
+        "website": {
+          "type": "varchar(500)",
+          "nullable": true,
+          "default": false
+        },
+        "address_line1": {
+          "type": "varchar(255)",
+          "nullable": true,
+          "default": false
+        },
+        "address_line2": {
+          "type": "varchar(255)",
+          "nullable": true,
+          "default": false
+        },
+        "city": {
+          "type": "varchar(100)",
+          "nullable": true,
+          "default": false
+        },
+        "state": {
+          "type": "varchar(100)",
+          "nullable": true,
+          "default": false
+        },
+        "postal_code": {
+          "type": "varchar(20)",
+          "nullable": true,
+          "default": false
+        },
+        "country": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "default": true
+        },
+        "logo_storage_key": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "description": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "is_active": {
+          "type": "boolean",
+          "nullable": false,
+          "default": true
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": []
+    },
+    "departments": {
+      "source": "psychometric-db-models/tenant/V020__departments.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "department_code": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "default": false
+        },
+        "department_name": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "default": false
+        },
+        "description": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "is_active": {
+          "type": "boolean",
+          "nullable": false,
+          "default": true
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": []
+    },
+    "doctor_departments": {
+      "source": "psychometric-db-models/tenant/V020__departments.sql",
+      "columns": {
+        "doctor_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "department_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "is_primary": {
+          "type": "boolean",
+          "nullable": false,
+          "default": true
+        },
+        "assigned_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "unassigned_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "doctor_id",
+        "department_id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "doctor_id",
+          "table": "doctors",
+          "target": "id"
+        },
+        {
+          "column": "department_id",
+          "table": "departments",
+          "target": "id"
+        }
+      ]
+    },
+    "assessment_access": {
+      "source": "psychometric-db-models/tenant/V021__assessment_access.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "assignment_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "patient_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "status": {
+          "type": "assessment_access_status",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "PENDING",
+            "ACTIVE",
+            "REVOKED",
+            "EXPIRED"
+          ]
+        },
+        "access_granted_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "access_expires_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "revoked_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "payment_verified_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "consent_verified_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "access_token_hash": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "last_accessed_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "assignment_id",
+          "table": "assessment_assignments",
+          "target": "id"
+        },
+        {
+          "column": "patient_id",
+          "table": "patients",
+          "target": "id"
+        }
+      ]
+    },
+    "doctor_availability": {
+      "source": "psychometric-db-models/tenant/V022__doctor_availability.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "doctor_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "day_of_week": {
+          "type": "availability_day",
+          "nullable": false,
+          "default": false,
+          "enum": [
+            "MONDAY",
+            "TUESDAY",
+            "WEDNESDAY",
+            "THURSDAY",
+            "FRIDAY",
+            "SATURDAY",
+            "SUNDAY"
+          ]
+        },
+        "start_time": {
+          "type": "time",
+          "nullable": false,
+          "default": false
+        },
+        "end_time": {
+          "type": "time",
+          "nullable": false,
+          "default": false
+        },
+        "timezone": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "default": true
+        },
+        "is_active": {
+          "type": "boolean",
+          "nullable": false,
+          "default": true
+        },
+        "effective_from": {
+          "type": "date",
+          "nullable": true,
+          "default": false
+        },
+        "effective_until": {
+          "type": "date",
+          "nullable": true,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "doctor_id",
+          "table": "doctors",
+          "target": "id"
+        }
+      ]
+    },
+    "appointments": {
+      "source": "psychometric-db-models/tenant/V023__appointments.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "doctor_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "patient_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "followup_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "title": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "default": false
+        },
+        "appointment_mode": {
+          "type": "appointment_mode",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "IN_PERSON",
+            "VIDEO",
+            "PHONE"
+          ]
+        },
+        "scheduled_start_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": false
+        },
+        "scheduled_end_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": false
+        },
+        "timezone": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "default": true
+        },
+        "status": {
+          "type": "appointment_status",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "SCHEDULED",
+            "CONFIRMED",
+            "IN_PROGRESS",
+            "COMPLETED",
+            "CANCELLED",
+            "NO_SHOW",
+            "RESCHEDULED"
+          ]
+        },
+        "meeting_url": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "location": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "notes": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "cancellation_reason": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "cancelled_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "completed_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "doctor_id",
+          "table": "doctors",
+          "target": "id"
+        },
+        {
+          "column": "patient_id",
+          "table": "patients",
+          "target": "id"
+        },
+        {
+          "column": "followup_id",
+          "table": "followups",
+          "target": "id"
+        }
+      ]
+    },
+    "notification_preferences": {
+      "source": "psychometric-db-models/tenant/V024__notification_preferences.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "user_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "event": {
+          "type": "notification_event",
+          "nullable": false,
+          "default": false,
+          "enum": [
+            "ASSESSMENT_ASSIGNED",
+            "PAYMENT_SUCCESSFUL",
+            "ASSESSMENT_STARTED",
+            "ASSESSMENT_EXPIRING",
+            "ASSESSMENT_EXPIRED",
+            "ASSESSMENT_COMPLETED",
+            "RESULT_GENERATED",
+            "REPORT_GENERATED",
+            "RETRY_APPROVED",
+            "RETRY_REJECTED",
+            "FOLLOWUP_CREATED",
+            "FOLLOWUP_REMINDER",
+            "APPOINTMENT_CREATED",
+            "APPOINTMENT_REMINDER",
+            "APPOINTMENT_CANCELLED",
+            "APPOINTMENT_RESCHEDULED",
+            "PASSWORD_RESET",
+            "OTP"
+          ]
+        },
+        "email_enabled": {
+          "type": "boolean",
+          "nullable": false,
+          "default": true
+        },
+        "sms_enabled": {
+          "type": "boolean",
+          "nullable": false,
+          "default": true
+        },
+        "push_enabled": {
+          "type": "boolean",
+          "nullable": false,
+          "default": true
+        },
+        "in_app_enabled": {
+          "type": "boolean",
+          "nullable": false,
+          "default": true
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "user_id",
+          "table": "users",
+          "target": "id"
+        }
+      ]
+    },
+    "assessment_reports": {
+      "source": "psychometric-db-models/tenant/V025__assessment_reports.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "result_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "attempt_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "assignment_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "report_version": {
+          "type": "integer",
+          "nullable": false,
+          "default": true
+        },
+        "report_format": {
+          "type": "assessment_report_format",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "PDF",
+            "HTML"
+          ]
+        },
+        "status": {
+          "type": "assessment_report_status",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "GENERATING",
+            "GENERATED",
+            "FAILED",
+            "EXPIRED"
+          ]
+        },
+        "file_name": {
+          "type": "varchar(255)",
+          "nullable": true,
+          "default": false
+        },
+        "storage_key": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "file_size_bytes": {
+          "type": "bigint",
+          "nullable": true,
+          "default": false
+        },
+        "mime_type": {
+          "type": "varchar(100)",
+          "nullable": true,
+          "default": false
+        },
+        "generated_by": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "generated_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "expires_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "error_message": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "download_count": {
+          "type": "integer",
+          "nullable": false,
+          "default": true
+        },
+        "last_downloaded_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "result_id",
+          "table": "assessment_results",
+          "target": "id"
+        },
+        {
+          "column": "attempt_id",
+          "table": "assessment_attempts",
+          "target": "id"
+        },
+        {
+          "column": "assignment_id",
+          "table": "assessment_assignments",
+          "target": "id"
+        },
+        {
+          "column": "generated_by",
+          "table": "users",
+          "target": "id"
+        }
+      ]
+    },
+    "assessment_retry_history": {
+      "source": "psychometric-db-models/tenant/V026__assessment_retry_history.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "assignment_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "previous_attempt_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "new_attempt_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "retry_number": {
+          "type": "integer",
+          "nullable": false,
+          "default": false
+        },
+        "action": {
+          "type": "retry_action",
+          "nullable": false,
+          "default": false,
+          "enum": [
+            "REQUESTED",
+            "APPROVED",
+            "REJECTED",
+            "STARTED",
+            "COMPLETED",
+            "EXPIRED",
+            "CANCELLED"
+          ]
+        },
+        "requested_by": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "action_by": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "reason": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "notes": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "requested_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "action_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "assignment_id",
+          "table": "assessment_assignments",
+          "target": "id"
+        },
+        {
+          "column": "previous_attempt_id",
+          "table": "assessment_attempts",
+          "target": "id"
+        },
+        {
+          "column": "new_attempt_id",
+          "table": "assessment_attempts",
+          "target": "id"
+        },
+        {
+          "column": "requested_by",
+          "table": "users",
+          "target": "id"
+        },
+        {
+          "column": "action_by",
+          "table": "users",
+          "target": "id"
+        }
+      ]
+    },
+    "clinical_notes": {
+      "source": "psychometric-db-models/tenant/V027__clinical_notes.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "doctor_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "patient_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "assignment_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "attempt_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "followup_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "appointment_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "note_type": {
+          "type": "clinical_note_type",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "GENERAL",
+            "ASSESSMENT",
+            "FOLLOWUP",
+            "APPOINTMENT"
+          ]
+        },
+        "title": {
+          "type": "varchar(255)",
+          "nullable": true,
+          "default": false
+        },
+        "note_text": {
+          "type": "text",
+          "nullable": false,
+          "default": false
+        },
+        "status": {
+          "type": "clinical_note_status",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "ACTIVE",
+            "ARCHIVED"
+          ]
+        },
+        "created_by": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "updated_by": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "archived_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "doctor_id",
+          "table": "doctors",
+          "target": "id"
+        },
+        {
+          "column": "patient_id",
+          "table": "patients",
+          "target": "id"
+        },
+        {
+          "column": "assignment_id",
+          "table": "assessment_assignments",
+          "target": "id"
+        },
+        {
+          "column": "attempt_id",
+          "table": "assessment_attempts",
+          "target": "id"
+        },
+        {
+          "column": "followup_id",
+          "table": "followups",
+          "target": "id"
+        },
+        {
+          "column": "appointment_id",
+          "table": "appointments",
+          "target": "id"
+        },
+        {
+          "column": "created_by",
+          "table": "users",
+          "target": "id"
+        },
+        {
+          "column": "updated_by",
+          "table": "users",
+          "target": "id"
+        }
+      ]
+    },
+    "patient_documents": {
+      "source": "psychometric-db-models/tenant/V028__patient_documents.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "patient_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "doctor_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "assignment_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "attempt_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "document_type": {
+          "type": "patient_document_type",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "PRESCRIPTION",
+            "REFERRAL",
+            "PREVIOUS_REPORT",
+            "MEDICAL_RECORD",
+            "ASSESSMENT_DOCUMENT",
+            "CONSENT_DOCUMENT",
+            "OTHER"
+          ]
+        },
+        "title": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "default": false
+        },
+        "description": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "file_name": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "default": false
+        },
+        "storage_key": {
+          "type": "text",
+          "nullable": false,
+          "default": false
+        },
+        "mime_type": {
+          "type": "varchar(100)",
+          "nullable": false,
+          "default": false
+        },
+        "file_size_bytes": {
+          "type": "bigint",
+          "nullable": false,
+          "default": false
+        },
+        "file_hash": {
+          "type": "varchar(128)",
+          "nullable": true,
+          "default": false
+        },
+        "status": {
+          "type": "patient_document_status",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "ACTIVE",
+            "ARCHIVED",
+            "DELETED"
+          ]
+        },
+        "uploaded_by": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "uploaded_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "archived_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "patient_id",
+          "table": "patients",
+          "target": "id"
+        },
+        {
+          "column": "doctor_id",
+          "table": "doctors",
+          "target": "id"
+        },
+        {
+          "column": "assignment_id",
+          "table": "assessment_assignments",
+          "target": "id"
+        },
+        {
+          "column": "attempt_id",
+          "table": "assessment_attempts",
+          "target": "id"
+        },
+        {
+          "column": "uploaded_by",
+          "table": "users",
+          "target": "id"
+        }
+      ]
+    },
+    "doctor_patient_messages": {
+      "source": "psychometric-db-models/tenant/V029__doctor_patient_messages.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "doctor_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "patient_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "assignment_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "followup_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "appointment_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "sender_user_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "sender_type": {
+          "type": "message_sender_type",
+          "nullable": false,
+          "default": false,
+          "enum": [
+            "DOCTOR",
+            "PATIENT",
+            "SYSTEM"
+          ]
+        },
+        "message_text": {
+          "type": "text",
+          "nullable": false,
+          "default": false
+        },
+        "status": {
+          "type": "message_status",
+          "nullable": false,
+          "default": true,
+          "enum": [
+            "SENT",
+            "DELIVERED",
+            "READ",
+            "FAILED"
+          ]
+        },
+        "sent_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "delivered_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "read_at": {
+          "type": "timestamptz",
+          "nullable": true,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "updated_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "doctor_id",
+          "table": "doctors",
+          "target": "id"
+        },
+        {
+          "column": "patient_id",
+          "table": "patients",
+          "target": "id"
+        },
+        {
+          "column": "assignment_id",
+          "table": "assessment_assignments",
+          "target": "id"
+        },
+        {
+          "column": "followup_id",
+          "table": "followups",
+          "target": "id"
+        },
+        {
+          "column": "appointment_id",
+          "table": "appointments",
+          "target": "id"
+        },
+        {
+          "column": "sender_user_id",
+          "table": "users",
+          "target": "id"
+        }
+      ]
+    },
+    "patient_timeline_events": {
+      "source": "psychometric-db-models/tenant/V030__patient_timeline_events.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "patient_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "doctor_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "event_type": {
+          "type": "patient_timeline_event_type",
+          "nullable": false,
+          "default": false,
+          "enum": [
+            "PATIENT_CREATED",
+            "DOCTOR_ASSIGNED",
+            "DOCTOR_UNASSIGNED",
+            "ASSESSMENT_ASSIGNED",
+            "PAYMENT_COMPLETED",
+            "ASSESSMENT_STARTED",
+            "ASSESSMENT_SAVED",
+            "ASSESSMENT_COMPLETED",
+            "ASSESSMENT_EXPIRED",
+            "RETRY_REQUESTED",
+            "RETRY_APPROVED",
+            "RETRY_REJECTED",
+            "RESULT_GENERATED",
+            "REPORT_GENERATED",
+            "FOLLOWUP_CREATED",
+            "FOLLOWUP_COMPLETED",
+            "FOLLOWUP_CANCELLED",
+            "APPOINTMENT_CREATED",
+            "APPOINTMENT_COMPLETED",
+            "APPOINTMENT_CANCELLED",
+            "APPOINTMENT_RESCHEDULED",
+            "CLINICAL_NOTE_CREATED",
+            "DOCUMENT_UPLOADED",
+            "MESSAGE_SENT",
+            "CONSENT_GRANTED",
+            "CONSENT_REVOKED"
+          ]
+        },
+        "event_title": {
+          "type": "varchar(255)",
+          "nullable": false,
+          "default": false
+        },
+        "event_description": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "assignment_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "attempt_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "result_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "followup_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "appointment_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "clinical_note_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "document_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "message_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "consent_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "performed_by": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "event_data": {
+          "type": "jsonb",
+          "nullable": true,
+          "default": false
+        },
+        "event_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "patient_id",
+          "table": "patients",
+          "target": "id"
+        },
+        {
+          "column": "doctor_id",
+          "table": "doctors",
+          "target": "id"
+        },
+        {
+          "column": "assignment_id",
+          "table": "assessment_assignments",
+          "target": "id"
+        },
+        {
+          "column": "attempt_id",
+          "table": "assessment_attempts",
+          "target": "id"
+        },
+        {
+          "column": "result_id",
+          "table": "assessment_results",
+          "target": "id"
+        },
+        {
+          "column": "followup_id",
+          "table": "followups",
+          "target": "id"
+        },
+        {
+          "column": "appointment_id",
+          "table": "appointments",
+          "target": "id"
+        },
+        {
+          "column": "clinical_note_id",
+          "table": "clinical_notes",
+          "target": "id"
+        },
+        {
+          "column": "document_id",
+          "table": "patient_documents",
+          "target": "id"
+        },
+        {
+          "column": "message_id",
+          "table": "doctor_patient_messages",
+          "target": "id"
+        },
+        {
+          "column": "consent_id",
+          "table": "consents",
+          "target": "id"
+        },
+        {
+          "column": "performed_by",
+          "table": "users",
+          "target": "id"
+        }
+      ]
+    },
+    "consent_history": {
+      "source": "psychometric-db-models/tenant/V031__consent_history.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "consent_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "user_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "patient_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "assignment_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "consent_type": {
+          "type": "consent_type",
+          "nullable": false,
+          "default": false,
+          "enum": [
+            "PATIENT_CONSENT",
+            "ASSESSMENT_CONSENT",
+            "DATA_PROCESSING_CONSENT",
+            "REPORT_SHARING_CONSENT"
+          ]
+        },
+        "consent_version": {
+          "type": "varchar(50)",
+          "nullable": false,
+          "default": false
+        },
+        "action": {
+          "type": "consent_action",
+          "nullable": false,
+          "default": false,
+          "enum": [
+            "GRANTED",
+            "REVOKED",
+            "UPDATED"
+          ]
+        },
+        "consent_text": {
+          "type": "text",
+          "nullable": false,
+          "default": false
+        },
+        "action_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "ip_address": {
+          "type": "inet",
+          "nullable": true,
+          "default": false
+        },
+        "user_agent": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "metadata": {
+          "type": "jsonb",
+          "nullable": true,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "consent_id",
+          "table": "consents",
+          "target": "id"
+        },
+        {
+          "column": "user_id",
+          "table": "users",
+          "target": "id"
+        },
+        {
+          "column": "patient_id",
+          "table": "patients",
+          "target": "id"
+        },
+        {
+          "column": "assignment_id",
+          "table": "assessment_assignments",
+          "target": "id"
+        }
+      ]
+    },
+    "assessment_payment_history": {
+      "source": "psychometric-db-models/tenant/V032__assessment_payment_history.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "assignment_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "payment_event": {
+          "type": "assessment_payment_event",
+          "nullable": false,
+          "default": false,
+          "enum": [
+            "PAYMENT_REQUIRED",
+            "PAYMENT_INITIATED",
+            "PAYMENT_SUCCESSFUL",
+            "PAYMENT_FAILED",
+            "PAYMENT_CANCELLED",
+            "PAYMENT_REFUNDED",
+            "PAYMENT_PARTIALLY_REFUNDED"
+          ]
+        },
+        "platform_payment_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "razorpay_order_id": {
+          "type": "varchar(255)",
+          "nullable": true,
+          "default": false
+        },
+        "razorpay_payment_id": {
+          "type": "varchar(255)",
+          "nullable": true,
+          "default": false
+        },
+        "currency": {
+          "type": "varchar(10)",
+          "nullable": false,
+          "default": true
+        },
+        "amount": {
+          "type": "numeric(12,2)",
+          "nullable": true,
+          "default": false
+        },
+        "event_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "failure_reason": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "metadata": {
+          "type": "jsonb",
+          "nullable": true,
+          "default": false
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "assignment_id",
+          "table": "assessment_assignments",
+          "target": "id"
+        }
+      ]
+    },
+    "assessment_access_audit": {
+      "source": "psychometric-db-models/tenant/V033__assessment_access_audit.sql",
+      "columns": {
+        "id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": true
+        },
+        "access_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "assignment_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "patient_id": {
+          "type": "uuid",
+          "nullable": false,
+          "default": false
+        },
+        "user_id": {
+          "type": "uuid",
+          "nullable": true,
+          "default": false
+        },
+        "event": {
+          "type": "assessment_access_event",
+          "nullable": false,
+          "default": false,
+          "enum": [
+            "ACCESS_REQUESTED",
+            "ACCESS_GRANTED",
+            "ACCESS_DENIED",
+            "ACCESS_USED",
+            "ACCESS_EXPIRED",
+            "ACCESS_REVOKED",
+            "INVALID_TOKEN",
+            "UNAUTHORIZED_ACCESS"
+          ]
+        },
+        "ip_address": {
+          "type": "inet",
+          "nullable": true,
+          "default": false
+        },
+        "user_agent": {
+          "type": "text",
+          "nullable": true,
+          "default": false
+        },
+        "request_id": {
+          "type": "varchar(100)",
+          "nullable": true,
+          "default": false
+        },
+        "metadata": {
+          "type": "jsonb",
+          "nullable": true,
+          "default": false
+        },
+        "event_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        },
+        "created_at": {
+          "type": "timestamptz",
+          "nullable": false,
+          "default": true
+        }
+      },
+      "primary_key": [
+        "id"
+      ],
+      "foreign_keys": [
+        {
+          "column": "access_id",
+          "table": "assessment_access",
+          "target": "id"
+        },
+        {
+          "column": "assignment_id",
+          "table": "assessment_assignments",
+          "target": "id"
+        },
+        {
+          "column": "patient_id",
+          "table": "patients",
+          "target": "id"
+        },
+        {
+          "column": "user_id",
+          "table": "users",
+          "target": "id"
+        }
+      ]
+    }
+  }
+}
